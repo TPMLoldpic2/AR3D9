@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#eee7d7">
+  <title>中華商場 · AR 明信片</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./vendor/aframe.min.js"></script>
+  <script src="./vendor/mindar-image-aframe.prod.js"></script>
+  <script src="./model-fit.js"></script>
+  <script src="./traffic.js?v=3"></script>
+  <script defer src="./app.js?v=3"></script>
+</head>
+<body data-view="home">
+  <main id="home">
+    <section class="postcard">
+      <div class="eyebrow">一張照片，一段城市記憶</div>
+      <h1>中華商場</h1>
+      <p class="subtitle">AR 印章明信片</p>
+      <img class="photo" src="./assets/target_photo.jpg" alt="用來辨識的中華商場街景照片">
+      <p class="instructions">按下開始，將鏡頭對準這張照片。<br>中華商場的立體街景，會出現在明信片上，車輛沿著街道緩緩行駛。</p>
+      <button id="start" type="button" class="primary">開始掃描明信片</button>
+      <p id="loadNote" class="note" role="status">準備 3D 街景中…</p>
+      <p id="homeError" class="error" role="alert" hidden></p>
+      <p class="note">請在光線充足的地方掃描，並避免照片反光。</p>
+    </section>
+  </main>
+
+  <div id="arRoot" aria-hidden="true">
+    <a-scene id="arScene" embedded
+      mindar-image="imageTargetSrc:./assets/targets.mind;autoStart:false;uiLoading:no;uiScanning:no;uiError:no"
+      renderer="colorManagement:true;physicallyCorrectLights:true;alpha:true;antialias:true"
+      color-space="sRGB" xr-mode-ui="enabled:false"
+      device-orientation-permission-ui="enabled:false">
+      <a-camera position="0 0 0" look-controls="enabled:false" wasd-controls="enabled:false"></a-camera>
+      <a-entity light="type:ambient;color:#ffffff;intensity:1.25"></a-entity>
+      <a-entity light="type:directional;color:#fff5df;intensity:2.2" position="1 2 3"></a-entity>
+      <a-entity id="photoAnchor" mindar-image-target="targetIndex:0">
+        <a-entity id="cityRoot" position="0 0 .006" scale=".95 .95 .95" visible="false">
+          <a-entity rotation="90 0 0">
+            <a-entity id="cityYaw">
+              <a-entity id="cityModel" fit-to-postcard="width:1" street-traffic="speed:1"
+                gltf-model="url(./assets/Zhonghua_Shopping_Arcade.glb)"></a-entity>
+            </a-entity>
+          </a-entity>
+        </a-entity>
+      </a-entity>
+    </a-scene>
+  </div>
+
+  <section id="scanUI" aria-label="AR 掃描介面" hidden>
+    <div id="trackingStatus" class="status" role="status" aria-live="polite">請對準中華商場照片</div>
+    <div id="scanGuide" aria-hidden="true"><span></span><p>將整張中華商場照片放入鏡頭中</p></div>
+    <div class="bottomBar">
+      <button id="adjust" type="button" aria-controls="modelControls" aria-expanded="false">調整模型</button>
+      <button id="stop" type="button">結束掃描</button>
+    </div>
+    <div id="modelControls" class="controls" hidden>
+      <h2>調整中華商場</h2>
+      <label><input id="trafficEnabled" type="checkbox" checked style="display:inline;width:auto;margin:0 8px 0 0">車輛行駛</label>
+      <label>車流速度 <output id="trafficSpeedValue">1.0×</output><input id="trafficSpeed" type="range" min=".25" max="2.5" step=".05" value="1"></label>
+      <label>大小 <output id="sizeValue">0.95</output><input id="size" type="range" min=".25" max="1.8" step=".01" value=".95"></label>
+      <label>方向 <output id="yawValue">0°</output><input id="yaw" type="range" min="-180" max="180" step="1" value="0"></label>
+      <label>離卡片高度 <output id="heightValue">0.006</output><input id="height" type="range" min="0" max=".3" step=".002" value=".006"></label>
+      <div class="controlActions"><button id="reset" type="button">恢復預設</button><button id="retryModel" type="button" hidden>重新載入模型</button></div>
+      <p>移動手機，可以從不同角度觀看街景。</p>
+    </div>
+  </section>
+  <noscript>請啟用 JavaScript 後使用 AR 掃描。</noscript>
+</body>
+</html>
